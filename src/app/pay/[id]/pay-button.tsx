@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { readResponse } from "@/lib/read-response";
 
 export default function PayButton({ paymentId }: { paymentId: string }) {
   const [busy, setBusy] = useState(false);
@@ -12,8 +13,7 @@ export default function PayButton({ paymentId }: { paymentId: string }) {
     try {
       // We only send the payment id. The server already knows the amount.
       const res = await fetch(`/api/payments/${paymentId}/pay`, { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Something went wrong");
+      const data = await readResponse<{ redirectUrl: string }>(res);
       // The server tells us where to go next: the (demo or real) bank.
       window.location.href = data.redirectUrl;
     } catch (err) {

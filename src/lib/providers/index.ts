@@ -1,4 +1,4 @@
-import type { Payment } from "@prisma/client";
+import type { Payment } from "@/generated/prisma/client";
 import { paymentMode } from "../config";
 
 // A "provider" is whoever actually asks the bank to move the money.

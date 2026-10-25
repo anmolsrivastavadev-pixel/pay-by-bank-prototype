@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { readResponse } from "@/lib/read-response";
 import { formatPence } from "@/lib/money";
 
 const BANKS = [
@@ -27,8 +28,7 @@ export default function DemoBank(props: { paymentId: string; amountPence: number
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ approve }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Something went wrong");
+      const data = await readResponse<{ redirectUrl: string }>(res);
       window.location.href = data.redirectUrl;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");

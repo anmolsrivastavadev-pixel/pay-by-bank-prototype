@@ -2,13 +2,14 @@
 // SQLite table for us, plus a typed client we can use from TypeScript.
 
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
+// Where the database lives is set in prisma.config.ts (for the CLI)
+// and src/lib/db.ts (for the app).
 datasource db {
   provider = "sqlite"
-  // A single file on disk. No database server to install.
-  url      = "file:./dev.db"
 }
 
 // The four states a payment can be in. It may only move forward:

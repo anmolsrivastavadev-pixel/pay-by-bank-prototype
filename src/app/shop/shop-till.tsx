@@ -7,6 +7,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import QRCode from "qrcode";
 import { formatPence } from "@/lib/money";
 import type { PublicPayment } from "@/lib/payments";
+import { readResponse } from "@/lib/read-response";
 
 type Screen =
   | { kind: "form" }
@@ -33,9 +34,7 @@ export default function ShopTill({ shopName }: { shopName: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount, note }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Something went wrong");
-      const payment = data as PublicPayment;
+      const payment = await readResponse<PublicPayment>(res);
 
       // 2. Turn the shopper's link into a QR code picture.
       //    The QR only contains a link with the payment id, never the amount.
