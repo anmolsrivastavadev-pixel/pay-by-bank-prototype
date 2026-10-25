@@ -1,0 +1,34 @@
+// The database "blueprint". Prisma reads this file and creates the
+// SQLite table for us, plus a typed client we can use from TypeScript.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  // A single file on disk. No database server to install.
+  url      = "file:./dev.db"
+}
+
+// The four states a payment can be in. It may only move forward:
+// created -> pending -> succeeded | failed
+enum PaymentStatus {
+  created
+  pending
+  succeeded
+  failed
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  // Money is ALWAYS whole pence. £3.50 is stored as 350.
+  amountPence       Int
+  currency          String        @default("GBP")
+  note              String
+  status            PaymentStatus @default(created)
+  // The id TrueLayer gives the payment (empty in demo mode).
+  providerPaymentId String?       @unique
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
