@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { advanceStatus, getPayment, PaymentStatus } from "@/lib/payments";
+import { baseUrlFrom } from "@/lib/config";
 import { startBankPayment } from "@/lib/providers";
 
 // POST /api/payments/:id/pay
@@ -8,7 +9,7 @@ import { startBankPayment } from "@/lib/providers";
 // Notice what the browser sends: NOTHING except the id in the URL.
 // It never says how much to pay. The server looks the amount up in its own
 // database, so a shopper can't edit the page and pay 1p instead of £3.50.
-export async function POST(_request: Request, { params }: RouteContext<"/api/payments/[id]/pay">) {
+export async function POST(request: Request, { params }: RouteContext<"/api/payments/[id]/pay">) {
   const { id } = await params;
   const payment = await getPayment(id);
   if (!payment) return NextResponse.json({ error: "Payment not found" }, { status: 404 });
@@ -24,10 +25,12 @@ export async function POST(_request: Request, { params }: RouteContext<"/api/pay
   if (!updated) return NextResponse.json({ error: "This payment can't be paid right now." }, { status: 409 });
 
   try {
-    const { redirectUrl } = await startBankPayment(updated);
+    const { redirectUrl } = await startBankPayment(updated, baseUrlFrom(request));
     return NextResponse.json({ redirectUrl });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: "Couldn't reach the bank. Please try again." }, { status: 502 });
+    // While developing, show the real reason (e.g. a missing setting).
+    const detail = process.env.NODE_ENV === "development" && err instanceof Error ? ` (${err.message})` : "";
+    return NextResponse.json({ error: `Couldn't reach the bank. Please try again.${detail}` }, { status: 502 });
   }
 }

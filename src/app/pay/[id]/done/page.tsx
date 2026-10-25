@@ -5,6 +5,7 @@ import AutoRefresh from "@/components/auto-refresh";
 import { formatPence } from "@/lib/money";
 import { shopName } from "@/lib/config";
 import { getPayment } from "@/lib/payments";
+import { refreshPayment } from "@/lib/providers";
 
 // The result page the shopper lands on after their bank.
 export default function DonePage({ params }: PageProps<"/pay/[id]/done">) {
@@ -19,8 +20,9 @@ export default function DonePage({ params }: PageProps<"/pay/[id]/done">) {
 
 async function Result({ params }: Pick<PageProps<"/pay/[id]/done">, "params">) {
   const { id } = await params;
-  const payment = await getPayment(id);
-  if (!payment) notFound();
+  const found = await getPayment(id);
+  if (!found) notFound();
+  const payment = await refreshPayment(found);
   const amount = formatPence(payment.amountPence);
 
   if (payment.status === "succeeded") {

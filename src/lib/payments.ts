@@ -21,6 +21,22 @@ export function getPayment(id: string) {
   return db.payment.findUnique({ where: { id } });
 }
 
+export function getPaymentByProviderId(providerPaymentId: string) {
+  return db.payment.findUnique({ where: { providerPaymentId } });
+}
+
+/**
+ * Remembers which TrueLayer payment belongs to our payment.
+ * Only allowed while the shopper is still paying (status "pending").
+ */
+export async function setProviderPaymentId(id: string, providerPaymentId: string) {
+  const { count } = await db.payment.updateMany({
+    where: { id, status: PaymentStatus.pending },
+    data: { providerPaymentId },
+  });
+  return count === 1;
+}
+
 export function listPayments() {
   return db.payment.findMany({ orderBy: { createdAt: "desc" }, take: 200 });
 }
