@@ -4,8 +4,11 @@ A web prototype of UPI-style "pay by bank" for the UK.
 A shop shows a QR code, a shopper scans it, taps **Pay by bank**, and the
 shop's screen turns green by itself. No card involved.
 
-> Right now only **demo mode** is built: the bank screens are pretend, so no
-> accounts or real money are needed. TrueLayer sandbox mode comes next.
+There are two modes, picked with `PAYMENT_MODE` in `.env.local`:
+
+- **`demo`**: the bank screens are pretend, so no accounts are needed. Start here.
+- **`truelayer`**: real Open Banking flow against TrueLayer's **sandbox**
+  (pretend banks, pretend money). Setup guide: [docs/truelayer-setup.md](docs/truelayer-setup.md).
 
 ## Run it on your laptop
 
@@ -61,6 +64,16 @@ Other pages: `/history` lists every payment and its status.
    → /pay/<id>/done
 ```
 
+In TrueLayer mode the middle part changes:
+
+```
+ Pay tapped → server gets a token, creates a SIGNED payment at TrueLayer ──▶ TrueLayer
+ phone is sent to TrueLayer's Hosted Payment Page → picks bank → approves
+ TrueLayer → /api/truelayer/return  → server asks TrueLayer "status?" → /pay/<id>/done
+ TrueLayer → /api/webhooks/truelayer (signature checked) → server asks TrueLayer → DB
+ TrueLayer status "settled" = our "succeeded", "failed" = "failed", anything else = "pending"
+```
+
 ## The rules the code follows
 
 | Rule | Where |
@@ -79,7 +92,10 @@ prisma.config.ts              where the database file lives (for the Prisma CLI)
 src/lib/                      server-side logic (money, payments, config, providers)
 src/app/shop/                 the shop till page
 src/app/pay/[id]/             the shopper's page and the result page
+src/lib/providers/truelayer.ts  everything that talks to TrueLayer
 src/app/demo-bank/[id]/       the pretend bank (demo mode only)
 src/app/history/              the payment list
 src/app/api/                  the server endpoints the pages call
+src/app/api/truelayer/return  where TrueLayer sends the shopper back
+src/app/api/webhooks/truelayer  where TrueLayer tells us a payment changed
 ```
