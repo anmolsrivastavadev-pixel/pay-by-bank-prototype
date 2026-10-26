@@ -9,7 +9,7 @@ shop's screen turns green by itself. No card involved.
 
 ## Run it on your laptop
 
-You need [Node.js](https://nodejs.org) 20 or newer (`node -v` to check).
+You need [Node.js](https://nodejs.org) 20.19 or newer (`node -v` to check).
 
 ```bash
 git clone https://github.com/anmolsrivastavadev-pixel/pay-by-bank-prototype.git
@@ -75,6 +75,7 @@ Other pages: `/history` lists every payment and its status.
 
 ```
 prisma/schema.prisma          the Payment table
+prisma.config.ts              where the database file lives (for the Prisma CLI)
 src/lib/                      server-side logic (money, payments, config, providers)
 src/app/shop/                 the shop till page
 src/app/pay/[id]/             the shopper's page and the result page
